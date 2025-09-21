@@ -5,5 +5,7 @@
     "clangd.path": "/usr/bin/clangd",
     "[c]": {
         "editor.defaultFormatter": "xaver.clang-format",
+        "editor.tabSize": 2,
+        "editor.indentSize": "tabSize",
     }
 }
