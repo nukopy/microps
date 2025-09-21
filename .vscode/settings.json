@@ -1,5 +1,6 @@
 {
     "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
     "clang-format.executable": "/usr/bin/clang-format",
     "[c]": {
         "editor.defaultFormatter": "xaver.clang-format",
