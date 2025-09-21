@@ -1,6 +1,6 @@
-APPS = 
+APPS =
 
-DRIVERS = 
+DRIVERS =
 
 OBJS = util.o \
 
@@ -21,7 +21,7 @@ endif
 .SUFFIXES:
 .SUFFIXES: .c .o
 
-.PHONY: all clean
+.PHONY: all clean format
 
 all: $(APPS) $(TESTS)
 
@@ -36,3 +36,6 @@ $(TESTS): %.exe : %.o $(OBJS) $(DRIVERS) test/test.h
 
 clean:
 	rm -rf $(APPS) $(APPS:.exe=.o) $(OBJS) $(DRIVERS) $(TESTS) $(TESTS:.exe=.o)
+
+format:
+	find . -name "*.c" -o -name "*.h" | xargs clang-format -i --sort-includes
