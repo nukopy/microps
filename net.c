@@ -50,10 +50,14 @@ int net_device_register(struct net_device *dev) {
   // https://docs.google.com/presentation/d/1ID6ggxASfc_1bWiJfDy1IFKIwzxvfYy8rUBrWYTRFj8/edit?slide=id.gd328c3072b_0_1179#slide=id.gd328c3072b_0_1179
   // 新規登録するデバイスの次のデバイスを、現在のデバイスリストの先頭のデバイスに設定する
   dev->next = devices;
+
   // 現在のデバイスリストの先頭のデバイスを新規登録するデバイスに設定する
   devices = dev;
+  infof("registered device: dev=%s, type=0x%04x", dev->name, dev->type);
 
-  infof("registered, dev=%s, type=0x%04x", dev->name, dev->type);
+  return 0;
+}
+
 
   return 0;
 }
