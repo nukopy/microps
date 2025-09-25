@@ -58,13 +58,55 @@ int net_device_register(struct net_device *dev) {
   return 0;
 }
 
+static int net_device_open(struct net_device *dev) {
+  // デバイスの状態を確認（既に UP 状態の場合はエラーを返す）
+  if (NET_DEVICE_IS_UP(dev)) {
+    errorf("device is already opened: dev=%s", dev->name);
+    return -1;
+  }
+
+  // デバイスドライバのオープン関数を呼び出す
+  // - オープン関数が設定されていない場合は呼び出しをスキップ
+  // - エラーが返されたらこの関数もエラーを返す
+  if (dev->ops->open) {
+    if (dev->ops->open(dev) == -1) {
+      errorf("failed to open device: dev=%s", dev->name);
+      return -1;
+    }
+  }
+
+  // デバイスのオープンに成功したら UP フラグを立てる
+  dev->flags |= NET_DEVICE_FLAG_UP;
+  infof("opened device status: dev=%s, state=%s", dev->name,
+        NET_DEVICE_STATE(dev));
 
   return 0;
 }
 
-static int net_device_open(struct net_device *dev) {}
+static int net_device_close(struct net_device *dev) {
+  // デバイスの状態を確認
+  // UP 状態でないデバイスを close しようとしたときはエラーを返す
+  if (!NET_DEVICE_IS_UP(dev)) {
+    errorf("device is not opened: dev=%s", dev->name);
+  }
 
-static int net_device_close(struct net_device *dev) {}
+  // デバイスドライバのクローズ関数を呼び出す
+  // - クローズ関数が設定されていない場合は呼び出しをスキップ
+  // - エラーが返されたらこの関数もエラーを返す
+  if (dev->ops->close) {
+    if (dev->ops->close(dev) == -1) {
+      errorf("failed to close device: dev=%s");
+      return -1;
+    }
+  }
+
+  // UP フラグを落とす
+  dev->flags &= ~NET_DEVICE_FLAG_UP;
+  infof("closed device status: dev=%s, state=%s", dev->name,
+        NET_DEVICE_STATE(dev));
+
+  return 0;
+}
 
 int net_device_output(struct net_device *dev, uint16_t type,
                       const uint8_t *data, size_t len, const void *dst) {}
