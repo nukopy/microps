@@ -108,8 +108,42 @@ static int net_device_close(struct net_device *dev) {
   return 0;
 }
 
+// デバイスへの出力
 int net_device_output(struct net_device *dev, uint16_t type,
-                      const uint8_t *data, size_t len, const void *dst) {}
+                      const uint8_t *data, size_t len, const void *dst) {
+  // デバイスの状態を確認
+  // UP 状態でないデバイスに出力する場合はエラーを返す
+  if (!NET_DEVICE_IS_UP(dev)) {
+    errorf("device is not opened on transmit: dev=%s", dev->name);
+    return -1;
+  }
+
+  // データのサイズを確認
+  // デバイスの MTU を超えるサイズのデータは送信できないのでエラーを返す
+  if (len > dev->mtu) {
+    errorf("data is too long on transmit: dev=%s, mtu=%u, len=%zu", dev->name,
+           dev->mtu, len);
+    return -1;
+  }
+  /* note: フォーマット指定子 %04x について
+
+  - `%04x`: 値を 16 進数で出力する。ゼロ 4 桁で padding。
+    - 幅を 4 桁に指定し、ゼロで埋める (`%0` + `4` + `x`)
+    - 16 進数で足りない桁は先頭を 0 で埋めて 4 桁で出力する
+  */
+  debugf("transmit to device: dev=%s, type=0x%04x, len=%zu", dev->name, type,
+         len);
+  debugdump(data, len);
+
+  // デバイスドライバの出力関数を呼び出す
+  // エラーが返されたらこの関数もエラーを返す
+  if (dev->ops->transmit(dev, type, data, len, dst) == -1) {
+    errorf("device transmit failure: dev=%s, len=%zu", dev->name, len);
+    return -1;
+  }
+
+  return 0;
+}
 
 int net_input_handler(uint16_t type, const uint8_t *data, size_t len,
                       struct net_device *dev) {}
