@@ -12,14 +12,21 @@
 #define NET_DEVICE_TYPE_LOOPBACK 0x0001
 #define NET_DEVICE_TYPE_ETHERNET 0x0002
 
+// NET_DEVICE_FLAG_UP:        0000_0000_0000_0001 = 1
 #define NET_DEVICE_FLAG_UP 0x0001
+// NET_DEVICE_FLAG_LOOPBACK:  0000_0000_0001_0000 = 16
 #define NET_DEVICE_FLAG_LOOPBACK 0x0010
+// NET_DEVICE_FLAG_BROADCAST: 0000_0000_0010_0000 = 32
 #define NET_DEVICE_FLAG_BROADCAST 0x0020
+// NET_DEVICE_FLAG_P2P:       0000_0000_0100_0000 = 64
 #define NET_DEVICE_FLAG_P2P 0x0040
+// NET_DEVICE_FLAG_NEED_ARP:  0000_0001_0000_0000 = 256 (= 16^2 * 1)
 #define NET_DEVICE_FLAG_NEED_ARP 0x0100
 
 #define NET_DEVICE_ADDR_LEN 16
 
+// UP flag が立っていればビット演算の論理積 AND の値が非 0 になり、
+// truthy な値となる
 #define NET_DEVICE_IS_UP(x) ((x)->flags & NET_DEVICE_FLAG_UP)
 #define NET_DEVICE_STATE(x) (NET_DEVICE_IS_UP(x) ? "up" : "down")
 
@@ -51,8 +58,8 @@ struct net_device {
     uint8_t broadcast[NET_DEVICE_ADDR_LEN];
   };
 
-  // デバイスドライバに実装されている関数が
-  // 設定された struct net_device_ops へのポインタ
+  // デバイスドライバに実装されている関数を
+  // 格納している構造体 struct net_device_ops へのポインタ
   struct net_device_ops *ops;
 
   // デバイスドライバが使用するプライベートなデータへのポインタ
