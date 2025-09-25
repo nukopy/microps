@@ -233,7 +233,7 @@ void net_shutdown(void) {
 
 int net_init(void) {
   // TODO: 今は何もしない。後に処理を追記。
-  infof("initialized");
+  infof("initialized protocol stack");
 
   return 0;
 }
