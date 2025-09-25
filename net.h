@@ -23,31 +23,49 @@
 #define NET_DEVICE_IS_UP(x) ((x)->flags & NET_DEVICE_FLAG_UP)
 #define NET_DEVICE_STATE(x) (NET_DEVICE_IS_UP(x) ? "up" : "down")
 
+// ネットワークデバイスの定義
+// ref:
+// https://docs.google.com/presentation/d/1ID6ggxASfc_1bWiJfDy1IFKIwzxvfYy8rUBrWYTRFj8/edit?slide=id.gd328c3072b_0_1161#slide=id.gd328c3072b_0_1161
 struct net_device {
-  struct net_device *next; // pointer to the next net_device
+  // 次のデバイスへのポインタ
+  struct net_device *next;
   unsigned int index;
   char name[IFNAMSIZ];
-  uint16_t
-      type; // type of the net_device (defined in net.h as NET_DEVICE_TYPE_XXX)
-  // ------------------------------------------------
-  // varies by the type of the net_device
-  uint16_t mtu;
+
+  // デバイスの種別（net.h に NET_DEVICE_TYPE_XXX として定義)
+  uint16_t type;
+
+  // ----- デバイスの種別によって変化する値 ---------------
+  uint16_t mtu; // デバイスの MTU (Maximum Transmission Unit) の値
   uint16_t flags;
   uint16_t hlen; /* header length */
   uint16_t alen; /* address length */
   // ------------------------------------------------
+
+  // デバイスのハードウェアアドレス
+  // - デバイスによってアドレスサイズが異なるので大きめのバッファを用意
+  // - アドレスを持たないデバイスでは値は設定されない
   uint8_t addr[NET_DEVICE_ADDR_LEN];
   union {
     uint8_t peer[NET_DEVICE_ADDR_LEN];
     uint8_t broadcast[NET_DEVICE_ADDR_LEN];
   };
+
+  // デバイスドライバに実装されている関数が
+  // 設定された struct net_device_ops へのポインタ
   struct net_device_ops *ops;
+
+  // デバイスドライバが使用するプライベートなデータへのポインタ
   void *priv;
 };
 
+// デバイスドライバに実装されている関数へのポインタを格納
 struct net_device_ops {
+  // optional
   int (*open)(struct net_device *dev);
+  // optional
   int (*close)(struct net_device *dev);
+  // required: 送信関数 transmit は必須
   int (*transmit)(struct net_device *dev, uint16_t type, const uint8_t *data,
                   size_t len, const void *dst);
 };
