@@ -175,8 +175,65 @@ int net_input_handler(uint16_t type, const uint8_t *data, size_t len,
   return 0;
 }
 
-int net_run(void) {}
+/* プロトコルスタックの起動
 
-void net_shutdown(void) {}
+## 呼び出しのコード例: net_run / net_shutdown
 
-int net_init(void) {}
+```c
+int main(void) {
+  if (net_init() == -1) {
+    return -1;
+  }
+
+  // デバイスの登録処理
+  // ...
+
+  // プロトコルスタックの起動
+  if (net_run() == -1) {
+    return -1;
+  }
+
+  // アプリケーションの処理
+  // ...
+
+  net_shutdown();
+
+  return 0;
+}
+```
+*/
+int net_run(void) {
+  struct net_device *dev;
+
+  debugf("open all devices...");
+  for (dev = devices; dev; dev = dev->next) {
+    if (net_device_open(dev) == -1) {
+      errorf("failed to open device on net_run: dev=%s");
+      // 失敗しても for 文を抜けはしない
+    }
+  }
+  debugf("running...");
+
+  return 0;
+}
+
+// プロトコルスタックの停止
+void net_shutdown(void) {
+  struct net_device *dev;
+
+  debugf("close all devices...");
+  for (dev = devices; dev; dev = dev->next) {
+    if (net_device_close(dev) == -1) {
+      errorf("failed to close device on shutting down: dev=%s");
+      // 失敗しても for 文を抜けはしない
+    }
+  }
+  debugf("shutting down");
+}
+
+int net_init(void) {
+  // TODO: 今は何もしない。後に処理を追記。
+  infof("initialized");
+
+  return 0;
+}
