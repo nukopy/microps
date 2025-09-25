@@ -131,22 +131,49 @@ int net_device_output(struct net_device *dev, uint16_t type,
     - 幅を 4 桁に指定し、ゼロで埋める (`%0` + `4` + `x`)
     - 16 進数で足りない桁は先頭を 0 で埋めて 4 桁で出力する
   */
-  debugf("transmit to device: dev=%s, type=0x%04x, len=%zu", dev->name, type,
+  debugf("output to device: dev=%s, type=0x%04x, len=%zu", dev->name, type,
          len);
   debugdump(data, len);
 
   // デバイスドライバの出力関数を呼び出す
   // エラーが返されたらこの関数もエラーを返す
   if (dev->ops->transmit(dev, type, data, len, dst) == -1) {
-    errorf("device transmit failure: dev=%s, len=%zu", dev->name, len);
+    errorf("device transmit failure on output: dev=%s, len=%zu", dev->name,
+           len);
     return -1;
   }
 
   return 0;
 }
 
+/* デバイスからの入力: デバイスが受信したパケットをプロトコルスタックに渡す関数
+
+・プロトコルスタックへのデータの入口であり、デバイスドライバから呼び出されることを想定している
+・複数のデバイスドライバからの入力を一手に受け取る
+
+ デバイスドライからこの関数が呼び出されるイメージ:
+
+           +----------------------+
+           | net_input_handler()  |
+           +-----------^----------+
+                       |
+          +------------+------------+
+          |                         |
+   +--------------+         +--------------+
+   | Device Driver|         | Device Driver|
+   +------^-------+         +------^-------+
+          |                         |
+        Device                   Device
+*/
 int net_input_handler(uint16_t type, const uint8_t *data, size_t len,
-                      struct net_device *dev) {}
+                      struct net_device *dev) {
+  // TODO: 今の段階では呼び出されたことがわかればよいのでデバッグ出力のみ
+  debugf("received data from device: dev=%s, type=0x%04x, len=%zu", dev->name,
+         type, len);
+  debugdump(data, len);
+
+  return 0;
+}
 
 int net_run(void) {}
 
