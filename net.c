@@ -95,7 +95,7 @@ static int net_device_close(struct net_device *dev) {
   // - エラーが返されたらこの関数もエラーを返す
   if (dev->ops->close) {
     if (dev->ops->close(dev) == -1) {
-      errorf("failed to close device: dev=%s");
+      errorf("failed to close device: dev=%s", dev->name);
       return -1;
     }
   }
