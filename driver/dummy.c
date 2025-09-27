@@ -9,6 +9,11 @@
 
 #define DUMMY_MTU UINT16_MAX /* maximum size of IP datagram (0 ~ 65535) */
 
+// ダミーデバイスが使う IRQ 番号
+// microps の IRQ 番号は 35 始まり
+/* platform/linux/platform.h
+#define INTR_IRQ_BASE (SIGRTMIN+1)
+*/
 #define DUMMY_IRQ INTR_IRQ_BASE
 
 static int dummy_transmit(struct net_device *dev, uint16_t type,
@@ -19,6 +24,10 @@ static int dummy_transmit(struct net_device *dev, uint16_t type,
 
   // データを破棄
   // ダミーデバイスなのでデータに対しては何もしない
+
+  // テスト用に割り込みを発生させる
+  intr_raise_irq(DUMMY_IRQ);
+
   return 0;
 }
 
@@ -28,7 +37,15 @@ static struct net_device_ops dummy_ops = {
     .transmit = dummy_transmit,
 };
 
-static int dummy_isr(unsigned int irq, void *id) {}
+static int dummy_isr(unsigned int irq, void *id) {
+  // 現段階ではダミーデバイス用の割り込みハンドラが呼び出されたことがわかれば良いのでデバッグ出力のみ
+  // FIXME: 本来は net_device 以外にも対応するため、キャストは行わない。
+  // あくまで現段階ではデバッグ用
+  struct net_device *dev = (struct net_device *)id; // 無理やりキャスト
+  debugf("ISR called: irq=%u, dev=%s", irq, dev->name);
+
+  return 0;
+}
 
 /* ダミーデバイスの初期化
 
@@ -65,6 +82,11 @@ struct net_device *dummy_init(void) {
     return NULL;
   }
   debugf("dummy device initialized: dev=%s", dev->name);
+
+  // デバイスの割り込みハンドラとして dummy_isr を登録する
+  infof("register interrupt handler for dummy device");
+  intr_register_irq_entry(DUMMY_IRQ, dummy_isr, INTR_IRQ_SHARED, dev->name,
+                          dev);
 
   return dev;
 }
