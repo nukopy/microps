@@ -38,6 +38,21 @@ static inline int mutex_unlock(mutex_t *mutex) {
  * Interrupt
  */
 
+// IRQ 番号の開始番号
+//
+/*
+
+microps では IRQ 番号としてシグナル番号を使用する。
+
+Linux では、SIGRTMIN ~ SIGRTMAX (34 ~ 64)までのシグナルを
+アプリケーションが任意の目的で利用できる。
+
+ただし、SIGRTMIN (34) に関しては、glibc が内部的に利用しているため、
++1 した番号から利用するようにしている。
+
+そのため、microps の IRQ 番号は 35 始まり。
+
+*/
 #define INTR_IRQ_BASE (SIGRTMIN + 1)
 
 #define INTR_IRQ_SHARED 0x0001
