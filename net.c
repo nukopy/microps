@@ -205,6 +205,14 @@ int main(void) {
 int net_run(void) {
   struct net_device *dev;
 
+  // 割り込み機構の起動
+  debugf("start interrupt processing...");
+  if (intr_run() == -1) {
+    errorf("intr_run() failure");
+    return -1;
+  }
+
+  // 登録済みの全デバイスをオープン
   debugf("open all devices...");
   for (dev = devices; dev; dev = dev->next) {
     if (net_device_open(dev) == -1) {
@@ -221,6 +229,7 @@ int net_run(void) {
 void net_shutdown(void) {
   struct net_device *dev;
 
+  // 登録済みの全デバイスをクローズ
   debugf("close all devices...");
   for (dev = devices; dev; dev = dev->next) {
     if (net_device_close(dev) == -1) {
@@ -228,11 +237,22 @@ void net_shutdown(void) {
       // 失敗しても for 文を抜けはしない
     }
   }
+
+  // 割り込み機構の終了
+  debugf("shutdown interrupt processing...");
+  intr_shutdown();
+
   debugf("shutting down");
 }
 
 int net_init(void) {
-  // TODO: 今は何もしない。後に処理を追記。
+  // 割り込み機構の初期化
+  debugf("initialize interrupt processing...");
+  if (intr_init() == -1) {
+    errorf("intr_init() failure");
+    return -1;
+  }
+
   infof("initialized protocol stack");
 
   return 0;
