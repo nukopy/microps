@@ -1,0 +1,11 @@
+{
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "clang-format.executable": "/usr/bin/clang-format",
+    "clangd.path": "/usr/bin/clangd",
+    "[c]": {
+        "editor.defaultFormatter": "xaver.clang-format",
+        "editor.tabSize": 2,
+        "editor.indentSize": "tabSize",
+    }
+}
