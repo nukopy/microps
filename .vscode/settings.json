@@ -1,11 +1,17 @@
 {
     "editor.formatOnSave": true,
-    "editor.formatOnPaste": false,
-    "clang-format.executable": "/usr/bin/clang-format",
+    "editor.formatOnPaste": true,
+
+    // LSP
     "clangd.path": "/usr/bin/clangd",
+
+    // Formatter
+    "clang-format.executable": "/usr/bin/clang-format",
+
+    // Editor settings for C/C++
     "[c]": {
         "editor.defaultFormatter": "xaver.clang-format",
-        "editor.tabSize": 2,
+        "editor.tabSize": 4,
         "editor.indentSize": "tabSize",
     }
 }
