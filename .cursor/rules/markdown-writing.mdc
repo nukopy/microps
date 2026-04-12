@@ -1,0 +1,75 @@
+---
+description: Rules for writing Markdown documents, including code blocks, sequence diagrams, and language-specific conventions.
+# Cursor
+globs: "**/*.md"
+alwaysApply: false
+# Claude Code
+paths:
+  - "**/*.md"
+---
+
+# Markdown Document Writing Guidelines
+
+## Common Writing Rules
+
+- Do not use dividers (`---`, `***`, `___`)
+- Always specify a language identifier on code blocks. Use `txt` if no programming language applies.
+
+  Bad:
+
+  ````txt
+  ```
+  some golang code
+  ```
+  ````
+
+  Good:
+
+  ````txt
+  ```go
+  some golang code
+  ```
+  ````
+
+- When writing `code` spans or English words inline in Japanese text, add a single half-width space before and after them
+- Do not use bold emphasis (`**...**` or `__...__`) in Markdown prose; rely on headings, lists, and `code` spans for structure and emphasis
+
+## Sequence Diagram Writing Rules
+
+- Use language-agnostic `mermaid` for sequence diagrams
+- Write all text in English, except API-specific Japanese proper nouns
+- Use the official full name for participant labels (e.g. `Biprogy API`, not `BipAPI`)
+
+### `alt` / `else` blocks
+
+- Use `alt/else` for mutually exclusive branches, not `opt`
+- Always put the error case first, success case in `else`
+
+### Self-arrows
+
+- Use a self-arrow (`Server->>Server`) for internal processing such as token expiry validation
+
+### HTTP communication
+
+- Prefix outgoing HTTP requests with `Request:<br/>` followed by the method and path
+- Response arrows must use dashed lines (`-->>`) — prefix with `Response:<br/>` followed by the response body
+
+  ```mermaid
+  Client->>+Server: Request:<br/>POST /oauth/v2/token/{api_key}
+  Server-->>-Client: Response:<br/>{ access_token, expires_in, refresh_token }
+  ```
+
+### DB operations
+
+- Prefix DB reads with `Read:<br/>` and DB writes with `Write:<br/>`
+- Response arrows must use dashed lines (`-->>`) — write the result directly with no prefix
+
+  ```mermaid
+  Server->>+DB: Read:<br/>user_id=123
+  DB-->>-Server: user={id: 123, name: "John Doe", encrypted_email: "john.doe@example.com"} or nil
+  ```
+
+  ```mermaid
+  Server->>+DB: Write:<br/>user_id=123<br/>name="John Doe"<br/>encrypted_email="xxx"
+  DB-->>-Server: OK
+  ```

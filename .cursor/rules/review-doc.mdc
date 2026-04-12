@@ -1,0 +1,73 @@
+---
+description: Rules for reviewing Markdown documents for readability, consistency, and accuracy.
+# Cursor
+globs: "**/*.md"
+alwaysApply: false
+# Claude Code
+paths:
+  - "**/*.md"
+---
+
+# Document Review Guidelines
+
+When reviewing a document, check each of the following areas and report issues grouped by severity: **critical** (blocks publication), **moderate** (degrades quality), **minor** (polish).
+
+## Readability
+
+### Sentence length and complexity
+
+- Flag sentences that pack multiple distinct points into a single breath; suggest splitting them.
+- In Japanese prose, a sentence exceeding roughly 100 characters without a natural pause is a candidate for review.
+- Flag deeply nested parenthetical clauses that make the main point hard to follow.
+
+### First-time terminology
+
+- Flag any technical or domain-specific term that appears for the first time without an inline explanation or a pointer to where it is defined.
+- Do not flag terms that are clearly within the stated target audience's prior knowledge.
+- Check that an abbreviation is expanded on its first use (e.g., "テストランナー（以下、ランナー）").
+
+### Redundancy
+
+- Flag a sentence that restates information already given in the immediately preceding sentence without adding new context.
+- Flag a section introduction that does nothing but repeat the heading.
+- Flag a summary or conclusion that lists exactly what was already covered without adding synthesis or a takeaway.
+
+## Consistency
+
+### Terminology
+
+- Flag a concept that is referred to by more than one name within the document (e.g., "実行単位" vs "テストの実行単位").
+- Flag a term whose meaning or scope appears to shift between sections.
+
+### Writing style
+
+- Flag mixing of formal (です・ます) and plain (だ・である) sentence-ending forms unless the mix is clearly intentional (e.g., inside quoted code comments vs. prose).
+- Flag heading styles that are inconsistent (e.g., some headings end with a noun, others with a verb form).
+
+### Document structure
+
+- Flag a table of contents entry that does not exactly match the corresponding section heading.
+- Flag heading levels that skip a rank (e.g., `##` directly followed by `####`).
+- Flag internal cross-references (links or section names in prose) that point to a heading that does not exist or has been renamed.
+
+### Code and prose alignment
+
+- Flag a prose description that contradicts the adjacent code block (e.g., wrong argument order, wrong return type).
+- Flag identifiers in prose (variable names, function names, type names) that do not match those in the code blocks.
+
+## Accuracy
+
+### Technical correctness
+
+- Flag factual claims that appear incorrect or are inconsistent with what the code or referenced sources show (e.g., wrong API signatures, mischaracterized behavior).
+- Flag code blocks that contain syntax errors or would produce output different from what the surrounding text claims.
+
+### Version and environment information
+
+- Flag version numbers, OS names, or tool versions that are inconsistent within the document.
+- Flag environment details in the prose that do not match the environment section (if one exists).
+
+### References and links
+
+- Flag broken anchor links or links to renamed headings.
+- Flag a footnote or reference label that is defined but never cited, or cited but never defined.

@@ -1,0 +1,16 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Respond in Japanese in chat
+
+- Respond in Japanese in chat
+- If the user asks for a code block, respond in English
+- If the user asks for a command, respond in English
+- If the user asks for a path, respond in English
+- If the user asks for an identifier, respond in English
+- If the user asks for a description, respond in English
+- If the user asks for a summary, respond in English
+- If the user asks for an explanation, respond in English
+- If the user asks for a tutorial, respond in English
