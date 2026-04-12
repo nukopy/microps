@@ -4,6 +4,10 @@
 
     // LSP
     "clangd.path": "/usr/bin/clangd",
+    // for compile_commands.json
+    // "clangd.arguments": [
+    //     "--compile-commands-dir=${workspaceFolder}"
+    // ],
 
     // Formatter
     "clang-format.executable": "/usr/bin/clang-format",
