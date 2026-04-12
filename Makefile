@@ -9,6 +9,7 @@ TESTS = test/step0.exe \
         test/step1.exe \
         test/step2.exe \
 
+CC := gcc
 CFLAGS := $(CFLAGS) -g -W -Wall -Wno-unused-parameter -iquote .
 
 ifeq ($(shell uname),Linux)
