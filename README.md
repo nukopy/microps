@@ -108,6 +108,16 @@ make
 ./test/step0.exe
 ```
 
+Build with hexdump flag:
+
+```sh
+make clean
+CFLAGS=-DHEXDUMP make
+
+# run tests: step0.exe, step1.exe, ...
+./test/step0.exe
+```
+
 ### Format
 
 ```sh
