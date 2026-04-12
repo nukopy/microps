@@ -54,6 +54,8 @@ vagrant plugin install vagrant-bindfs --plugin-version 1.3.1
 
 ### Setup VM
 
+Commands for managing VM:
+
 ```sh
 cd microps
 
@@ -80,6 +82,13 @@ vagrant ssh-config
 
 # stop VM
 vagrant halt
+```
+
+Before starting development, you should set Git config in VM like below:
+
+```sh
+git config --global user.name "nukopy"
+git config --global user.email "nukopy@gmail.com"
 ```
 
 ## Development
