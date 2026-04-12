@@ -1,20 +1,23 @@
+SRC_DIR := src
+TEST_DIR := test
+
 APPS =
 
-DRIVERS = driver/dummy.o
+DRIVERS = $(SRC_DIR)/driver/dummy.o
 
-OBJS = util.o \
-	   net.o \
+OBJS = $(SRC_DIR)/util.o \
+	   $(SRC_DIR)/net.o \
 
-TESTS = test/step0.exe \
-        test/step1.exe \
-        test/step2.exe \
+TESTS = $(TEST_DIR)/step0.exe \
+        $(TEST_DIR)/step1.exe \
+        $(TEST_DIR)/step2.exe \
 
 CC := gcc
-CFLAGS := $(CFLAGS) -g -W -Wall -Wno-unused-parameter -iquote .
+CFLAGS := $(CFLAGS) -g -W -Wall -Wno-unused-parameter -iquote $(SRC_DIR)
 
 ifeq ($(shell uname),Linux)
   # Linux specific settings
-  BASE = platform/linux
+  BASE = $(SRC_DIR)/platform/linux
   CFLAGS := $(CFLAGS) -pthread -iquote $(BASE)
   OBJS := $(OBJS) $(BASE)/intr.o
 endif
@@ -33,7 +36,7 @@ all: $(APPS) $(TESTS)
 $(APPS): %.exe : %.o $(OBJS) $(DRIVERS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(TESTS): %.exe : %.o $(OBJS) $(DRIVERS) test/test.h
+$(TESTS): %.exe : %.o $(OBJS) $(DRIVERS) $(TEST_DIR)/test.h
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 .c.o:
