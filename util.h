@@ -29,37 +29,37 @@
  */
 
 #define timeval_add_usec(x, y)                                                 \
-  do {                                                                         \
-    (x)->tv_sec += y / 1000000;                                                \
-    (x)->tv_usec += y % 1000000;                                               \
-    if ((x)->tv_usec >= 1000000) {                                             \
-      (x)->tv_sec += 1;                                                        \
-      (x)->tv_usec -= 1000000;                                                 \
-    }                                                                          \
-  } while (0);
+    do {                                                                       \
+        (x)->tv_sec += y / 1000000;                                            \
+        (x)->tv_usec += y % 1000000;                                           \
+        if ((x)->tv_usec >= 1000000) {                                         \
+            (x)->tv_sec += 1;                                                  \
+            (x)->tv_usec -= 1000000;                                           \
+        }                                                                      \
+    } while (0);
 
 #define timespec_add_nsec(x, y)                                                \
-  do {                                                                         \
-    (x)->tv_sec += y / 1000000000;                                             \
-    (x)->tv_nsec += y % 1000000000;                                            \
-    if ((x)->tv_nsec >= 1000000000) {                                          \
-      (x)->tv_sec += 1;                                                        \
-      (x)->tv_nsec -= 1000000000;                                              \
-    }                                                                          \
-  } while (0);
+    do {                                                                       \
+        (x)->tv_sec += y / 1000000000;                                         \
+        (x)->tv_nsec += y % 1000000000;                                        \
+        if ((x)->tv_nsec >= 1000000000) {                                      \
+            (x)->tv_sec += 1;                                                  \
+            (x)->tv_nsec -= 1000000000;                                        \
+        }                                                                      \
+    } while (0);
 
 /*
  * Logging
  */
 
 #define errorf(...)                                                            \
-  lprintf(stderr, 'E', __FILE__, __LINE__, __func__, __VA_ARGS__)
+    lprintf(stderr, 'E', __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define warnf(...)                                                             \
-  lprintf(stderr, 'W', __FILE__, __LINE__, __func__, __VA_ARGS__)
+    lprintf(stderr, 'W', __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define infof(...)                                                             \
-  lprintf(stderr, 'I', __FILE__, __LINE__, __func__, __VA_ARGS__)
+    lprintf(stderr, 'I', __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define debugf(...)                                                            \
-  lprintf(stderr, 'D', __FILE__, __LINE__, __func__, __VA_ARGS__)
+    lprintf(stderr, 'D', __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #ifdef HEXDUMP
 #define debugdump(...) hexdump(stderr, __VA_ARGS__)
@@ -78,9 +78,9 @@ extern void hexdump(FILE *fp, const void *data, size_t size);
 struct queue_entry;
 
 struct queue_head {
-  struct queue_entry *head;
-  struct queue_entry *tail;
-  unsigned int num;
+    struct queue_entry *head;
+    struct queue_entry *tail;
+    unsigned int num;
 };
 
 extern void queue_init(struct queue_head *queue);

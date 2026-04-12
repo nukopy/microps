@@ -13,137 +13,138 @@
 static struct net_device *devices;
 
 struct net_device *net_device_alloc(void) {
-  // pointer to new net_device
-  struct net_device *dev;
+    // pointer to new net_device
+    struct net_device *dev;
 
-  // デバイス構造体のサイズのメモリを確保
-  // - memory_alloc() で確保したメモリ領域は 0 で初期化されている
-  // - メモリが確保できなかったらエラーとして NULL を返す
-  // - メモリの確保と解放には memory_alloc() と memory_free() を使う
-  dev = memory_alloc(sizeof(*dev));
-  if (!dev) {
-    errorf("memory_alloc() failure");
-    return NULL;
-  }
+    // デバイス構造体のサイズのメモリを確保
+    // - memory_alloc() で確保したメモリ領域は 0 で初期化されている
+    // - メモリが確保できなかったらエラーとして NULL を返す
+    // - メモリの確保と解放には memory_alloc() と memory_free() を使う
+    dev = memory_alloc(sizeof(*dev));
+    if (!dev) {
+        errorf("memory_alloc() failure");
+        return NULL;
+    }
 
-  return dev;
+    return dev;
 }
 
 /* NOTE: must not be call after net_run() */
 // デバイスの登録
 int net_device_register(struct net_device *dev) {
-  // （関数の初回実行時だけ動く）デバイスのインデックス番号の初期化
-  // note: 関数内で static な変数を一度だけ初期化し、関数呼出し間で保持できる。
-  // note: 関数に副作用を入れることになる。
-  // note: マルチスレッド環境でのデータ競合に注意。
-  static unsigned int index = 0;
+    // （関数の初回実行時だけ動く）デバイスのインデックス番号の初期化
+    // note: 関数内で static
+    // な変数を一度だけ初期化し、関数呼出し間で保持できる。 note:
+    // 関数に副作用を入れることになる。 note:
+    // マルチスレッド環境でのデータ競合に注意。
+    static unsigned int index = 0;
 
-  // デバイスのインデックス番号の設定
-  // note: 後置インクリメントなので現在の値を代入してからインクリメントされる
-  dev->index = index++; // set, then increment
+    // デバイスのインデックス番号の設定
+    // note: 後置インクリメントなので現在の値を代入してからインクリメントされる
+    dev->index = index++; // set, then increment
 
-  // デバイス名を生成する（net0, net1, net2, ...）
-  snprintf(dev->name, sizeof(dev->name), "net%d", dev->index);
+    // デバイス名を生成する（net0, net1, net2, ...）
+    snprintf(dev->name, sizeof(dev->name), "net%d", dev->index);
 
-  // デバイスリストの先頭にデバイスを追加
-  // ref: Day 1 - デバイスの生成と登録
-  // https://docs.google.com/presentation/d/1ID6ggxASfc_1bWiJfDy1IFKIwzxvfYy8rUBrWYTRFj8/edit?slide=id.gd328c3072b_0_1179#slide=id.gd328c3072b_0_1179
-  // 新規登録するデバイスの次のデバイスを、現在のデバイスリストの先頭のデバイスに設定する
-  dev->next = devices;
+    // デバイスリストの先頭にデバイスを追加
+    // ref: Day 1 - デバイスの生成と登録
+    // https://docs.google.com/presentation/d/1ID6ggxASfc_1bWiJfDy1IFKIwzxvfYy8rUBrWYTRFj8/edit?slide=id.gd328c3072b_0_1179#slide=id.gd328c3072b_0_1179
+    // 新規登録するデバイスの次のデバイスを、現在のデバイスリストの先頭のデバイスに設定する
+    dev->next = devices;
 
-  // 現在のデバイスリストの先頭のデバイスを新規登録するデバイスに設定する
-  devices = dev;
-  infof("registered device: dev=%s, type=0x%04x", dev->name, dev->type);
+    // 現在のデバイスリストの先頭のデバイスを新規登録するデバイスに設定する
+    devices = dev;
+    infof("registered device: dev=%s, type=0x%04x", dev->name, dev->type);
 
-  return 0;
+    return 0;
 }
 
 static int net_device_open(struct net_device *dev) {
-  // デバイスの状態を確認（既に UP 状態の場合はエラーを返す）
-  if (NET_DEVICE_IS_UP(dev)) {
-    errorf("device is already opened: dev=%s", dev->name);
-    return -1;
-  }
-
-  // デバイスドライバのオープン関数を呼び出す
-  // - オープン関数が設定されていない場合は呼び出しをスキップ
-  // - エラーが返されたらこの関数もエラーを返す
-  if (dev->ops->open) {
-    if (dev->ops->open(dev) == -1) {
-      errorf("failed to open device: dev=%s", dev->name);
-      return -1;
+    // デバイスの状態を確認（既に UP 状態の場合はエラーを返す）
+    if (NET_DEVICE_IS_UP(dev)) {
+        errorf("device is already opened: dev=%s", dev->name);
+        return -1;
     }
-  }
 
-  // デバイスのオープンに成功したら UP フラグを立てる
-  dev->flags |= NET_DEVICE_FLAG_UP;
-  infof("opened device status: dev=%s, state=%s", dev->name,
-        NET_DEVICE_STATE(dev));
+    // デバイスドライバのオープン関数を呼び出す
+    // - オープン関数が設定されていない場合は呼び出しをスキップ
+    // - エラーが返されたらこの関数もエラーを返す
+    if (dev->ops->open) {
+        if (dev->ops->open(dev) == -1) {
+            errorf("failed to open device: dev=%s", dev->name);
+            return -1;
+        }
+    }
 
-  return 0;
+    // デバイスのオープンに成功したら UP フラグを立てる
+    dev->flags |= NET_DEVICE_FLAG_UP;
+    infof("opened device status: dev=%s, state=%s", dev->name,
+          NET_DEVICE_STATE(dev));
+
+    return 0;
 }
 
 static int net_device_close(struct net_device *dev) {
-  // デバイスの状態を確認
-  // UP 状態でないデバイスを close しようとしたときはエラーを返す
-  if (!NET_DEVICE_IS_UP(dev)) {
-    errorf("device is not opened: dev=%s", dev->name);
-  }
-
-  // デバイスドライバのクローズ関数を呼び出す
-  // - クローズ関数が設定されていない場合は呼び出しをスキップ
-  // - エラーが返されたらこの関数もエラーを返す
-  if (dev->ops->close) {
-    if (dev->ops->close(dev) == -1) {
-      errorf("failed to close device: dev=%s", dev->name);
-      return -1;
+    // デバイスの状態を確認
+    // UP 状態でないデバイスを close しようとしたときはエラーを返す
+    if (!NET_DEVICE_IS_UP(dev)) {
+        errorf("device is not opened: dev=%s", dev->name);
     }
-  }
 
-  // UP フラグを落とす
-  dev->flags &= ~NET_DEVICE_FLAG_UP;
-  infof("closed device status: dev=%s, state=%s", dev->name,
-        NET_DEVICE_STATE(dev));
+    // デバイスドライバのクローズ関数を呼び出す
+    // - クローズ関数が設定されていない場合は呼び出しをスキップ
+    // - エラーが返されたらこの関数もエラーを返す
+    if (dev->ops->close) {
+        if (dev->ops->close(dev) == -1) {
+            errorf("failed to close device: dev=%s", dev->name);
+            return -1;
+        }
+    }
 
-  return 0;
+    // UP フラグを落とす
+    dev->flags &= ~NET_DEVICE_FLAG_UP;
+    infof("closed device status: dev=%s, state=%s", dev->name,
+          NET_DEVICE_STATE(dev));
+
+    return 0;
 }
 
 // デバイスへの出力
 int net_device_output(struct net_device *dev, uint16_t type,
                       const uint8_t *data, size_t len, const void *dst) {
-  // デバイスの状態を確認
-  // UP 状態でないデバイスに出力する場合はエラーを返す
-  if (!NET_DEVICE_IS_UP(dev)) {
-    errorf("device is not opened on transmit: dev=%s", dev->name);
-    return -1;
-  }
+    // デバイスの状態を確認
+    // UP 状態でないデバイスに出力する場合はエラーを返す
+    if (!NET_DEVICE_IS_UP(dev)) {
+        errorf("device is not opened on transmit: dev=%s", dev->name);
+        return -1;
+    }
 
-  // データのサイズを確認
-  // デバイスの MTU を超えるサイズのデータは送信できないのでエラーを返す
-  if (len > dev->mtu) {
-    errorf("data is too long on transmit: dev=%s, mtu=%u, len=%zu", dev->name,
-           dev->mtu, len);
-    return -1;
-  }
-  /* note: フォーマット指定子 %04x について
+    // データのサイズを確認
+    // デバイスの MTU を超えるサイズのデータは送信できないのでエラーを返す
+    if (len > dev->mtu) {
+        errorf("data is too long on transmit: dev=%s, mtu=%u, len=%zu",
+               dev->name, dev->mtu, len);
+        return -1;
+    }
+    /* note: フォーマット指定子 %04x について
 
-  - `%04x`: 値を 16 進数で出力する。ゼロ 4 桁で padding。
-    - 幅を 4 桁に指定し、ゼロで埋める (`%0` + `4` + `x`)
-    - 16 進数で足りない桁は先頭を 0 で埋めて 4 桁で出力する
-  */
-  debugf("output to device: dev=%s, type=0x%04x, len=%zu", dev->name, type,
-         len);
-  debugdump(data, len);
-
-  // デバイスドライバの出力関数を呼び出す
-  // エラーが返されたらこの関数もエラーを返す
-  if (dev->ops->transmit(dev, type, data, len, dst) == -1) {
-    errorf("device transmit failure on output: dev=%s, len=%zu", dev->name,
+    - `%04x`: 値を 16 進数で出力する。ゼロ 4 桁で padding。
+      - 幅を 4 桁に指定し、ゼロで埋める (`%0` + `4` + `x`)
+      - 16 進数で足りない桁は先頭を 0 で埋めて 4 桁で出力する
+    */
+    debugf("output to device: dev=%s, type=0x%04x, len=%zu", dev->name, type,
            len);
-    return -1;
-  }
+    debugdump(data, len);
 
-  return 0;
+    // デバイスドライバの出力関数を呼び出す
+    // エラーが返されたらこの関数もエラーを返す
+    if (dev->ops->transmit(dev, type, data, len, dst) == -1) {
+        errorf("device transmit failure on output: dev=%s, len=%zu", dev->name,
+               len);
+        return -1;
+    }
+
+    return 0;
 }
 
 /* デバイスからの入力: デバイスが受信したパケットをプロトコルスタックに渡す関数
@@ -167,12 +168,12 @@ int net_device_output(struct net_device *dev, uint16_t type,
 */
 int net_input_handler(uint16_t type, const uint8_t *data, size_t len,
                       struct net_device *dev) {
-  // TODO: 今の段階では呼び出されたことがわかればよいのでデバッグ出力のみ
-  debugf("received data from device: dev=%s, type=0x%04x, len=%zu", dev->name,
-         type, len);
-  debugdump(data, len);
+    // TODO: 今の段階では呼び出されたことがわかればよいのでデバッグ出力のみ
+    debugf("received data from device: dev=%s, type=0x%04x, len=%zu", dev->name,
+           type, len);
+    debugdump(data, len);
 
-  return 0;
+    return 0;
 }
 
 /* プロトコルスタックの起動
@@ -203,57 +204,57 @@ int main(void) {
 ```
 */
 int net_run(void) {
-  struct net_device *dev;
+    struct net_device *dev;
 
-  // 割り込み機構の起動
-  debugf("start interrupt processing...");
-  if (intr_run() == -1) {
-    errorf("intr_run() failure");
-    return -1;
-  }
-
-  // 登録済みの全デバイスをオープン
-  debugf("open all devices...");
-  for (dev = devices; dev; dev = dev->next) {
-    if (net_device_open(dev) == -1) {
-      errorf("failed to open device on net_run: dev=%s");
-      // 失敗しても for 文を抜けはしない
+    // 割り込み機構の起動
+    debugf("start interrupt processing...");
+    if (intr_run() == -1) {
+        errorf("intr_run() failure");
+        return -1;
     }
-  }
-  debugf("running...");
 
-  return 0;
+    // 登録済みの全デバイスをオープン
+    debugf("open all devices...");
+    for (dev = devices; dev; dev = dev->next) {
+        if (net_device_open(dev) == -1) {
+            errorf("failed to open device on net_run: dev=%s");
+            // 失敗しても for 文を抜けはしない
+        }
+    }
+    debugf("running...");
+
+    return 0;
 }
 
 // プロトコルスタックの停止
 void net_shutdown(void) {
-  struct net_device *dev;
+    struct net_device *dev;
 
-  // 登録済みの全デバイスをクローズ
-  debugf("close all devices...");
-  for (dev = devices; dev; dev = dev->next) {
-    if (net_device_close(dev) == -1) {
-      errorf("failed to close device on shutting down: dev=%s");
-      // 失敗しても for 文を抜けはしない
+    // 登録済みの全デバイスをクローズ
+    debugf("close all devices...");
+    for (dev = devices; dev; dev = dev->next) {
+        if (net_device_close(dev) == -1) {
+            errorf("failed to close device on shutting down: dev=%s");
+            // 失敗しても for 文を抜けはしない
+        }
     }
-  }
 
-  // 割り込み機構の終了
-  debugf("shutdown interrupt processing...");
-  intr_shutdown();
+    // 割り込み機構の終了
+    debugf("shutdown interrupt processing...");
+    intr_shutdown();
 
-  debugf("shutting down");
+    debugf("shutting down");
 }
 
 int net_init(void) {
-  // 割り込み機構の初期化
-  debugf("initialize interrupt processing...");
-  if (intr_init() == -1) {
-    errorf("intr_init() failure");
-    return -1;
-  }
+    // 割り込み機構の初期化
+    debugf("initialize interrupt processing...");
+    if (intr_init() == -1) {
+        errorf("intr_init() failure");
+        return -1;
+    }
 
-  infof("initialized protocol stack");
+    infof("initialized protocol stack");
 
-  return 0;
+    return 0;
 }
